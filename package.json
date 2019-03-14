@@ -1,0 +1,24 @@
+{
+  "name": "mongodb-connector",
+  "version": "1.0.0",
+  "description": "MongoDB Connector for GraphQL using Facebook's DataLoader",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon src --exec babel-node -r dotenv.config.js"
+  },
+  "author": "MikeIbberson",
+  "license": "ISC",
+  "dependencies": {
+    "dataloader": "^1.4.0",
+    "mongodb": "^3.1.13"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/node": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "dotenv": "^7.0.0",
+    "nodemon": "^1.18.10"
+  }
+}
