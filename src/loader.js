@@ -1,5 +1,6 @@
 import DataLoader from 'dataloader';
 import assert from 'assert';
+import sift from 'sift';
 
 export default class LoaderWrapper {
 
@@ -12,10 +13,17 @@ export default class LoaderWrapper {
 
     }
 
-    batchById = new DataLoader(async ids =>
-        await this.find({
-            _id: { $in: ids }
-        }));
+    batchById = new DataLoader(async keys => {
+        let resp = await this.find({
+            _id: { $in: keys }
+        });
+
+        return keys.map(query =>
+            resp.filter(
+                sift({ _id: query })
+            )[0] || null
+        );
+    });
 
     find = async args =>
         await this.col
@@ -33,6 +41,5 @@ export default class LoaderWrapper {
         assert.ok(insertedCount);
         return ops;
     };
-
 
 }

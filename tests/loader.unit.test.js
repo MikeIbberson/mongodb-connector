@@ -1,3 +1,5 @@
+import MongoMemoryServer from 'mongodb-memory-server';
+import { ObjectId } from 'mongodb';
 import { Loader } from '../src';
 
 let args = { stats: jest.fn };
@@ -54,6 +56,21 @@ describe('Batch methods', () => {
             });
     });
 
+    it('should ensure keys and values always have the same length', async () => {
+        let match = { _id: ObjectId(), name: 'Logan' };
+        let match2 = { _id: ObjectId(), name: 'Paul' };
+        instance.find = jest.fn(() =>
+            new Promise(resolve => resolve([match, match2])));
 
+        let results = await Promise.all([
+            instance.batchById.load(match._id),
+            instance.batchById.load(ObjectId()),
+            instance.batchById.load(match2._id)
+        ]);
+
+        expect(results[0]).toMatchObject(match);
+        expect(results[2]).toMatchObject(match2);
+        expect(results[1]).toBeNull();
+    });
 
 });
