@@ -1,4 +1,5 @@
 import DataLoader from 'dataloader';
+import { ObjectId } from 'mongodb';
 import assert from 'assert';
 import sift from 'sift';
 
@@ -38,7 +39,23 @@ export default class LoaderWrapper {
             .insertOne(args);
 
         assert.ok(insertedCount);
-        return ops;
+        assert.ok(ops.length);
+        return ops[0];
+    };
+
+    updateById = async (id, args) => {
+        if (!id) throw new Error('ID required');
+
+        let { ok, value } = await this.col
+            .findOneAndUpdate(
+                { _id: ObjectId(id) }, args,
+                { returnOriginal: false }
+            );
+
+        assert.ok(ok);
+        this.batchById.clear(id);
+        return value;
+
     };
 
 }

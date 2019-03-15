@@ -7,3 +7,5 @@ __NOTE:__ This module does not introduce application-level caching. It leverages
 |`batchById`|Accepts an `array` of ObjectIds.|`array`|yes|
 |`find`|Accepts an `object` for filtering MongoDB's native find query.|`array`|no|
 |`findOne`|Accepts an `object` for narrowing MongoDB's search. This method is a direct abstraction; there are no modifications to its behaviour.|`object`|no|
+|`createOne`|Accepts an `object` to insert into collection.|`object`|no|
+|`updateById`|Accepts an `ObjectId` as its first parameter and an `object` as its second. The arguments in the second parameter should contain MongoDB operators. It will return the updated document.|`object`|yes|
