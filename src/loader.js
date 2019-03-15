@@ -1,10 +1,10 @@
 import DataLoader from 'dataloader';
-import { ObjectId } from 'mongodb';
+import assert from 'assert';
 
 export default class LoaderWrapper {
 
     constructor(col) {
-        if (!col.stats && typeof col.stats === 'function') {
+        if (!col.stats || typeof col.stats !== 'function') {
             throw new Error('Must provide a collection');
         }
 
@@ -12,19 +12,27 @@ export default class LoaderWrapper {
 
     }
 
-    find = async () =>
+    batchById = new DataLoader(async ids =>
+        await this.find({
+            _id: { $in: ids }
+        }));
+
+    find = async args =>
         await this.col
-            .find()
+            .find(args)
             .toArray();
 
     findOne = async args =>
         await this.col
             .findOne(args);
 
-    batchById = new DataLoader(async ids =>
-        await ids.map(id => this.findOne({
-            _id: ObjectId(id)
-        }))
-    );
+    createOne = async args => {
+        let { ops, insertedCount } = await this.col
+            .insertOne(args);
+
+        assert.ok(insertedCount);
+        return ops;
+    };
+
 
 }

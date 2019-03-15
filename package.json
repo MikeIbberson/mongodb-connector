@@ -4,6 +4,7 @@
   "description": "MongoDB Connector for GraphQL using Facebook's DataLoader",
   "main": "dist/index.js",
   "scripts": {
+    "test": "jest --watch --verbose",
     "dev": "nodemon src --exec babel-node -r dotenv.config.js"
   },
   "author": "MikeIbberson",
@@ -19,6 +20,21 @@
     "@babel/plugin-proposal-class-properties": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
     "dotenv": "^7.0.0",
+    "jest": "^24.5.0",
+    "mongodb-memory-server": "^4.2.1",
     "nodemon": "^1.18.10"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "globals": {
+      "__DEV__": true
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/dotenv.config.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ]
   }
 }
