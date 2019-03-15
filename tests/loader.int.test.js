@@ -1,11 +1,16 @@
 import MongoMemoryServer from 'mongodb-memory-server';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import { Loader } from '../src';
 
 let db;
 let conn;
 let instance;
 let client;
+
+let ref = {
+    _id: ObjectId(),
+    name: 'Roy'
+};
 
 beforeAll(async () => {
     const server = new MongoMemoryServer();
@@ -20,9 +25,9 @@ beforeAll(async () => {
     instance = new Loader(db.collection('demo'));
 
     await instance.col.insertMany([
-        { name: 'Roy' },
-        { name: 'Lee' },
-        { name: 'Tara' }
+        { _id: ObjectId(), name: 'Lee' },
+        { _id: ObjectId(), name: 'Tara' },
+        ref
     ]);
 });
 
@@ -32,9 +37,24 @@ afterAll(async () => {
 
 describe('Read operations', () => {
 
-    it('should should return no results', async () => {
+    it('should should return all results', async () => {
         expect(await instance.find())
             .toHaveLength(3);
+    });
+
+    it('should return filtered results', async () => {
+        expect(await instance.find({ name: 'Roy' }))
+            .toHaveLength(1);
+    });
+
+    it('should return single document', async () => {
+        expect(await instance.findOne({ _id: ref._id }))
+            .toMatchObject(ref);
+    });
+
+    it('should return null', async () => {
+        expect(await instance.findOne({ _id: ObjectId() }))
+            .toBeNull();
     });
 
 });

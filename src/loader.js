@@ -3,7 +3,6 @@ import assert from 'assert';
 import sift from 'sift';
 
 export default class LoaderWrapper {
-
     constructor(col) {
         if (!col.stats || typeof col.stats !== 'function') {
             throw new Error('Must provide a collection');
