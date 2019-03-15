@@ -1,7 +1,7 @@
 # mongodb-connector
 Simple MongoDB connector for Apollo Server using Facebook's DataLoader
 
-__coming soon__
+__NOTE:__ This module does not introduce application-level caching. It leverages DataLoader's memoization cache to reduce MongoDB loads.
 
 ## Loader Export
 |Method|Parameters|Response|Cached/Batched|

@@ -1,4 +1,3 @@
-import MongoMemoryServer from 'mongodb-memory-server';
 import { ObjectId } from 'mongodb';
 import { Loader } from '../src';
 
