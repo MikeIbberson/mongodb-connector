@@ -4,13 +4,16 @@ import assert from 'assert';
 import sift from 'sift';
 
 export default class LoaderWrapper {
-    constructor(col) {
+    constructor(col, options = {}) {
         if (!col.stats || typeof col.stats !== 'function') {
             throw new Error('Must provide a collection');
         }
 
         this.col = col;
+        this.pagination = 25;
 
+        // overwrite defaults
+        Object.assign(this, options);
     }
 
     batchById = new DataLoader(async keys => {
@@ -31,8 +34,12 @@ export default class LoaderWrapper {
             .toArray();
 
     findOne = async args =>
+        await this.col.findOne(args);
+
+    aggregate = async args =>
         await this.col
-            .findOne(args);
+            .aggregate(args)
+            .toArray();
 
     createOne = async args => {
         let { ops, insertedCount } = await this.col
@@ -40,7 +47,10 @@ export default class LoaderWrapper {
 
         assert.ok(insertedCount);
         assert.ok(ops.length);
-        return ops[0];
+
+        let doc = ops[0];
+        this.batchById.prime(doc._id, doc);
+        return doc;
     };
 
     updateById = async (id, args) => {
@@ -55,7 +65,26 @@ export default class LoaderWrapper {
         assert.ok(ok);
         this.batchById.clear(id);
         return value;
-
     };
 
-}
+    deleteById = async (id, toggle) => {
+        if (toggle) {
+            await this.updateById(id, {
+                $set: { [toggle]: false }
+            });
+
+            return true;
+        } else {
+
+            let { ok } = await this.col
+                .deleteOne({
+                    _id: ObjectId(id)
+                });
+
+            assert.ok(ok);
+            this.batchById.clear(id);
+            return true;
+        }
+    };
+
+};
