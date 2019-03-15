@@ -1,4 +1,7 @@
 # mongodb-connector
+
+**Under development. Some unit tests left to write and additional methods.**
+
 __NOTE:__ This module does not introduce application-level caching. It leverages DataLoader's memoization cache to reduce MongoDB loads only. Please fork this project if you wish to integrate such functionality or open an "enhancement" issue for me to review.
 
 ## Loader Export
