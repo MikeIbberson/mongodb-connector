@@ -27,10 +27,10 @@ export default class Connector {
 
 
     async disconnect() {
-        return await this.client.disconnect();
+        return await this.client.close();
     }
 
-    async getCollection(name) {
+    getCollection(name) {
         return this.db.collection(name);
     }
 

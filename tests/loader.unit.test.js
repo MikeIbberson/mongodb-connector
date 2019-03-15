@@ -24,7 +24,7 @@ describe('Loader instantiation', () => {
 
 });
 
-describe('Batch methods', () => {
+describe('Single ID batch method', () => {
 
     it('should aggregate the IDs', async () => {
         instance.find = jest.fn(() =>

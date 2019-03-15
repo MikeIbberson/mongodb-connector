@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1552614624190" clover="3.2.0">
+  <project timestamp="1552614624190" name="All files">
+    <metrics statements="11" coveredstatements="0" conditionals="1" coveredconditionals="0" methods="3" coveredmethods="0" elements="15" coveredelements="0" complexity="0" loc="11" ncloc="11" packages="1" files="1" classes="1"/>
+    <file name="connector.js" path="C:\Users\Micha\Apps\mongodb-connector\src\connector.js">
+      <metrics statements="11" coveredstatements="0" conditionals="1" coveredconditionals="0" methods="3" coveredmethods="0"/>
+      <line num="9" count="0" type="stmt"/>
+      <line num="11" count="0" type="stmt"/>
+      <line num="12" count="0" type="stmt"/>
+      <line num="16" count="0" type="stmt"/>
+      <line num="17" count="0" type="stmt"/>
+      <line num="19" count="0" type="stmt"/>
+      <line num="20" count="0" type="stmt"/>
+      <line num="23" count="0" type="stmt"/>
+      <line num="24" count="0" type="stmt"/>
+      <line num="30" count="0" type="stmt"/>
+      <line num="34" count="0" type="stmt"/>
+    </file>
+  </project>
+</coverage>

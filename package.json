@@ -4,7 +4,7 @@
   "description": "MongoDB Connector for GraphQL using Facebook's DataLoader",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest --watch --verbose",
+    "test": "jest --watch --runInBand",
     "dev": "nodemon src --exec babel-node -r dotenv.config.js"
   },
   "author": "MikeIbberson",
