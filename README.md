@@ -5,21 +5,26 @@
 This module does not introduce application-level caching. It leverages DataLoader's memoization cache to reduce MongoDB loads only. Please fork this project if you wish to integrate such functionality or open an "enhancement" issue for me to review.
 
 ## Connector Export
+Most users will connect and pass a collection directly into the loader export below. However, sometimes you need to configure your data first. We've been this a bit easier with some additional helper methods.
 
-__ NEEDS UPDATING __
-Most users will only call the "connect" and "getCollection" methods. Connect accepts an object to modify the MongoDB connection options. However, the credentials and connection string are fetched automatically from environment variables. Your project must have the following defined: DB_USER, DB_PASSWORD, DB_HOST and DB_NAME. 
+|Method|Parameters|Response|
+|---|---|---|---|
+|`connect`|Requires a URI (`string`) and a database name (`string`). You can provide a third `object` parameter for MongoClient options.  |`object`|
+|`disconnect`|Terminates connection to database. No parameters.|`undefined`|
+|`getCollection`|Collection name (`string`)|`object`|
+|`validateCollection`|Collection name (`string`) and a validation `object`. See syntax below.|`object`|
 
-If you wish to add a validation to a collection, you can call `validateCollection`. You must provide its name and an object in the following format: 
+If you wish to add validation, provide an object in the following format:
 
 ```
-validateCollection('demo', {
+await instance.validateCollection('demo', {
     fieldName: {
-        type: 'String',
+        type: 'string',
         description: 'This is a required field',
         required: true
     },
     'fieldName.nestedFieldName': {
-        type: 'Number'
+        type: 'bumber'
     }
 });
 
