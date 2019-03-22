@@ -41,17 +41,18 @@ describe('Single ID batch method', () => {
     });
 
     it('should remove duplicates from the resolver array', async () => {
+        let id = ObjectId();
         instance.find = jest.fn(() =>
             new Promise(resolve => resolve([1])));
 
         await Promise.all([
-            instance.batchById.load(1),
-            instance.batchById.load(1)
+            instance.batchById.load(id),
+            instance.batchById.load(id)
         ]);
 
         expect(instance.find)
             .toHaveBeenCalledWith({
-                _id: { $in: [1] }
+                _id: { $in: [id] }
             });
     });
 

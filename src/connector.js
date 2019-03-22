@@ -31,21 +31,25 @@ export default class Connector {
         return this.db.collection(name);
     }
 
-    validateCollection(name, props) {
+    async validateCollection(name, props) {
         let validator = {
             $jsonSchema: Object
                 .entries(props)
                 .reduce(arrayIntoJSONSchema, {
                     bsonType: 'object',
                     required: [],
-                    properties: []
+                    properties: {}
                 })
         };
 
-        let colls = this.db.getCollectionNames();
+        let exists = await this.db.listCollections({ name });
 
-        return colls.includes(name) ?
-            this.db.runCommand({
+        if (!validator.$jsonSchema.required.length) {
+            delete validator.$jsonSchema.required;
+        }
+
+        return exists.length ?
+            this.db.command({
                 collMod: name,
                 validationLevel: 'moderate',
                 validationAction: 'warn',
@@ -59,9 +63,10 @@ export default class Connector {
 
 }
 
-export const arrayIntoJSONSchema = (acc, current) => {
-    let key = current[0];
-    let value = current[1];
+export const arrayIntoJSONSchema = (acc, [key, value]) => {
+    if (!value.type) {
+        throw new Error('Type is a required property');
+    }
 
     if (value.required) {
         acc.required.push(key);
