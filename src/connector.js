@@ -31,4 +31,46 @@ export default class Connector {
         return this.db.collection(name);
     }
 
+    validateCollection(name, props) {
+        let validator = {
+            $jsonSchema: Object
+                .entries(props)
+                .reduce(arrayIntoJSONSchema, {
+                    bsonType: 'object',
+                    required: [],
+                    properties: []
+                })
+        };
+
+        let colls = this.db.getCollectionNames();
+
+        return colls.includes(name) ?
+            this.db.runCommand({
+                collMod: name,
+                validationLevel: 'moderate',
+                validationAction: 'warn',
+                validator
+            }) :
+            this.db.createCollection(name, {
+                validator
+            });
+
+    }
+
 }
+
+export const arrayIntoJSONSchema = (acc, current) => {
+    let key = current[0];
+    let value = current[1];
+
+    if (value.required) {
+        acc.required.push(key);
+    }
+
+    acc.properties[key] = {
+        bsonType: value.type,
+        description: value.description
+    };
+
+    return acc;
+};
