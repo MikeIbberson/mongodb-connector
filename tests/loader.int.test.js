@@ -57,6 +57,17 @@ describe('Read operations', () => {
             .toMatchObject(ref);
     });
 
+    it('should return single document', async () => {
+        expect(await instance.findById(ref._id))
+            .toMatchObject(ref);
+    });
+
+    it('should return null', async () => {
+        expect(await instance.findById(ref._id,
+            { name: { $ne: 'Roy' } }))
+            .toBeNull();
+    });
+
     it('should return null', async () => {
         expect(await instance.findOne({ _id: ObjectId() }))
             .toBeNull();

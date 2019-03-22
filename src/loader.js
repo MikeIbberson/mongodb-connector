@@ -11,14 +11,13 @@ export default class LoaderWrapper {
 
         this.col = col;
         this.pagination = 25;
-
-        // overwrite defaults
         Object.assign(this, options);
     }
 
     batchById = new DataLoader(async keys => {
+        let ids = keys.map(item => ObjectId(item));
         let resp = await this.find({
-            _id: { $in: keys }
+            _id: { $in: ids }
         });
 
         return keys.map(query =>
@@ -35,6 +34,12 @@ export default class LoaderWrapper {
 
     findOne = async args =>
         await this.col.findOne(args);
+
+    findById = async (id, options = {}) =>
+        await this.col.findOne({
+            _id: ObjectId(id),
+            ...options
+        });
 
     aggregate = async args =>
         await this.col

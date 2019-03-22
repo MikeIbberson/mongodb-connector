@@ -1,10 +1,24 @@
 import { Connector } from '../src';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let host;
+let dbName;
 let instance;
 
-beforeAll(() => {
-    host = process.env.DB_HOST;
+const initValidator = {
+    bsonType: 'object',
+    required: [],
+    properties: []
+};
+
+beforeAll(async () => {
+    const mongod = new MongoMemoryServer({
+        autoStart: false,
+    });
+
+    if (!mongod.isRunning) await mongod.start();
+    host = await mongod.getConnectionString();
+    dbName = await mongod.getDbName();
 });
 
 beforeEach(() => {
@@ -18,15 +32,18 @@ describe('Connector class', () => {
             .toHaveProperty('client', null));
 
     it('should return connection', async () =>
-        expect(await instance.connect())
+        expect(await instance.connect(host, dbName))
             .not.toBeNull());
 
-    it('should throw an error without environment variables', () => {
-        process.env.DB_HOST = null;
+    it('should throw an error without uri', () =>
         expect(instance.connect())
             .rejects
-            .toThrowError()
-    });
+            .toThrowError());
+
+    it('should throw an error without name', () =>
+        expect(instance.connect(host))
+            .rejects
+            .toThrowError());
 
     it('should throw an error if disconnected is called before connect', () =>
         expect(instance.disconnect())
@@ -34,20 +51,45 @@ describe('Connector class', () => {
             .toThrowError());
 
     it('should disconnect from database', async () => {
-        process.env.DB_HOST = host;
-        await instance.connect();
+        await instance.connect(host, dbName);
         expect(await instance.disconnect())
             .toBeUndefined();
     });
 
     it('should throw an error if collection called before connection', () =>
-        expect(() => instance.getCollection('test'))
+        expect(instance.getCollection('test'))
+            .rejects
             .toThrowError());
 
     it('should return a collection', async () => {
-        await instance.connect();
-        expect(instance.getCollection('test'))
+        await instance.connect(host, dbName);
+        expect(await instance.getCollection('test'))
             .toHaveProperty('stats');
+    });
+
+    it('should set validation options', async () => {
+        await instance.connect(host, dbName);
+        let col = await instance.getCollection('demo', {
+            validator: {
+                $jsonSchema: {
+                    bsonType: 'object',
+                    properties: {
+                        name: {
+                            bsonType: 'string'
+                        }
+                    }
+                }
+            },
+            collation: {
+                locale: 'en'
+            }
+        });
+
+        let options = await col.options();
+        expect(options).toHaveProperty('validator');
+        expect(options).toHaveProperty('collation');
+        expect(options.validator).toHaveProperty('$jsonSchema');
+        expect(options.collation).toHaveProperty('locale', 'en');
     });
 
 });
