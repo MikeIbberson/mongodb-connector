@@ -5,14 +5,13 @@
 This module does not introduce application-level caching. It leverages DataLoader's memoization cache to reduce MongoDB loads only. Please fork this project if you wish to integrate such functionality or open an "enhancement" issue for me to review.
 
 ## Connector Export
-Most users will connect and pass a collection directly into the loader export below. However, sometimes you need to configure your data first. We've been this a bit easier with some additional helper methods.
+We recommend adding a step between our Connector and Loader for configuring things like indices. Since the `getCollection` returns Mongo's native `Collection`, you can call any methods within their documentation. Really, `getCollection` is just a wrapper for `createCollection`, so settings for validation and collation should be done through here.
 
 |Method|Parameters|Response|
 |---|---|---|
 |`connect`|Requires a URI (`string`) and a database name (`string`). You can provide a third `object` parameter for MongoClient options.  |`object`|
 |`disconnect`|Terminates connection to database. No parameters.|`undefined`|
-|`getCollection`|Collection name (`string`)|`object`|
-|`validateCollection`|Collection name (`string`) and a validation `object`. See syntax below.|`object`|
+|`getCollection`|Collection name (`string`) and options `object`|`object`|
 
 If you wish to add validation, provide an object in the following format:
 

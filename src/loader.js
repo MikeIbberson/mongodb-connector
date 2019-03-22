@@ -11,8 +11,6 @@ export default class LoaderWrapper {
 
         this.col = col;
         this.pagination = 25;
-
-        // overwrite defaults
         Object.assign(this, options);
     }
 
