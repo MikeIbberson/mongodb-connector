@@ -8,7 +8,7 @@ This module does not introduce application-level caching. It leverages DataLoade
 Most users will connect and pass a collection directly into the loader export below. However, sometimes you need to configure your data first. We've been this a bit easier with some additional helper methods.
 
 |Method|Parameters|Response|
-|---|---|---|---|
+|---|---|---|
 |`connect`|Requires a URI (`string`) and a database name (`string`). You can provide a third `object` parameter for MongoClient options.  |`object`|
 |`disconnect`|Terminates connection to database. No parameters.|`undefined`|
 |`getCollection`|Collection name (`string`)|`object`|
