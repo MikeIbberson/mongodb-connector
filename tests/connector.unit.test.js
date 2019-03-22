@@ -1,7 +1,9 @@
 import { Connector } from '../src';
 import { arrayIntoJSONSchema } from '../src/connector';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let host;
+let dbName;
 let instance;
 
 const initValidator = {
@@ -10,8 +12,14 @@ const initValidator = {
     properties: []
 };
 
-beforeAll(() => {
-    host = process.env.DB_HOST;
+beforeAll(async () => {
+    const mongod = new MongoMemoryServer({
+        autoStart: false,
+    });
+
+    if (!mongod.isRunning) await mongod.start();
+    host = await mongod.getConnectionString();
+    dbName = await mongod.getDbName();
 });
 
 beforeEach(() => {
@@ -25,15 +33,18 @@ describe('Connector class', () => {
             .toHaveProperty('client', null));
 
     it('should return connection', async () =>
-        expect(await instance.connect())
+        expect(await instance.connect(host, dbName))
             .not.toBeNull());
 
-    it('should throw an error without environment variables', () => {
-        process.env.DB_HOST = null;
+    it('should throw an error without uri', () =>
         expect(instance.connect())
             .rejects
-            .toThrowError()
-    });
+            .toThrowError());
+
+    it('should throw an error without name', () =>
+        expect(instance.connect(host))
+            .rejects
+            .toThrowError());
 
     it('should throw an error if disconnected is called before connect', () =>
         expect(instance.disconnect())
@@ -41,8 +52,7 @@ describe('Connector class', () => {
             .toThrowError());
 
     it('should disconnect from database', async () => {
-        process.env.DB_HOST = host;
-        await instance.connect();
+        await instance.connect(host, dbName);
         expect(await instance.disconnect())
             .toBeUndefined();
     });
@@ -52,13 +62,13 @@ describe('Connector class', () => {
             .toThrowError());
 
     it('should return a collection', async () => {
-        await instance.connect();
+        await instance.connect(host, dbName);
         expect(instance.getCollection('test'))
             .toHaveProperty('stats');
     });
 
     it('should set validation options', async () => {
-        let db = await instance.connect();
+        await instance.connect(host, dbName);
         await instance.validateCollection('demo', {
             fieldName: {
                 type: 'string',
@@ -68,10 +78,10 @@ describe('Connector class', () => {
         });
 
         let col = instance.getCollection('demo');
-        console.log(col);
-        expect(col.options).toHaveProperty('validator');
-
-    })
+        let options = await col.options();
+        expect(options).toHaveProperty('validator');
+        expect(options.validator).toHaveProperty('$jsonSchema');
+    });
 
 });
 
@@ -84,7 +94,7 @@ describe('iterator helper for schema validation', () => {
     it('should populate the required fields array', () => {
         let reducer = arrayIntoJSONSchema(
             initValidator,
-            ['field', { type: 'String', required: true }]
+            ['field', { type: 'string', required: true }]
         );
 
         expect(reducer)
@@ -94,12 +104,12 @@ describe('iterator helper for schema validation', () => {
     it('should format the key-value pair', () => {
         let reducer = arrayIntoJSONSchema(
             initValidator,
-            ['field', { type: 'String', description: 'Hi' }]
+            ['field', { type: 'string', description: 'Hi' }]
         );
 
         expect(reducer.properties.field)
             .toMatchObject({
-                bsonType: 'String',
+                bsonType: 'string',
                 description: 'Hi'
             });
     });

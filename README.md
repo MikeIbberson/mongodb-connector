@@ -5,6 +5,8 @@
 This module does not introduce application-level caching. It leverages DataLoader's memoization cache to reduce MongoDB loads only. Please fork this project if you wish to integrate such functionality or open an "enhancement" issue for me to review.
 
 ## Connector Export
+
+__ NEEDS UPDATING __
 Most users will only call the "connect" and "getCollection" methods. Connect accepts an object to modify the MongoDB connection options. However, the credentials and connection string are fetched automatically from environment variables. Your project must have the following defined: DB_USER, DB_PASSWORD, DB_HOST and DB_NAME. 
 
 If you wish to add a validation to a collection, you can call `validateCollection`. You must provide its name and an object in the following format: 
