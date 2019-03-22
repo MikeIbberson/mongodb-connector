@@ -26,8 +26,8 @@ beforeAll(async () => {
     col = db.collection('demo');
 
     await col.insertMany([
-        { _id: ObjectId(), name: 'Lee' },
         { _id: ObjectId(), name: 'Tara' },
+        { _id: ObjectId(), name: 'Lee' },
         ref
     ]);
 });
@@ -43,13 +43,13 @@ afterAll(async () => {
 describe('Read operations', () => {
 
     it('should should return all results', async () => {
-        expect(await instance.find())
-            .toHaveLength(3);
+        let { results } = await instance.find();
+        expect(results).toHaveLength(3);
     });
 
     it('should return filtered results', async () => {
-        expect(await instance.find({ name: 'Roy' }))
-            .toHaveLength(1);
+        let { results } = await instance.find({ name: 'Roy' });
+        expect(results).toHaveLength(1);
     });
 
     it('should return single document', async () => {
@@ -72,6 +72,31 @@ describe('Read operations', () => {
         expect(await instance.findOne({ _id: ObjectId() }))
             .toBeNull();
     });
+
+});
+
+describe('pagination', () => {
+
+    it('should return 3 unsorted results', async () => {
+        let { results } = await instance.find();
+        expect(results).toHaveLength(3);
+        expect(results[0]).toHaveProperty('name', 'Tara');
+    });
+
+    it('should return a single sorted, paginated result', async () => {
+        let alteredPagination = new Loader(col, {
+            pagination: 1
+        });
+
+        let { results, seeker } = await alteredPagination.find(null, { name: 1 });
+        expect(results).toHaveLength(1);
+        expect(results[0]).toHaveProperty('name', 'Lee');
+
+        let { results: results2 } = await alteredPagination.find(null, { name: 1 }, seeker);
+        expect(results2).toHaveLength(1);
+        expect(results2[0]).toHaveProperty('name', 'Roy');
+    });
+
 
 });
 

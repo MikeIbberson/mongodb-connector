@@ -27,10 +27,36 @@ export default class LoaderWrapper {
         );
     });
 
-    find = async args =>
-        await this.col
-            .find(args)
+    find = async (args, sort, id) => {
+
+        let seeker = null;
+        let next = null;
+        let pos = {};
+
+        if (id) {
+            seeker = await this.findById(id);
+            pos = sort ?
+                iterateSort(sort, seeker) :
+                { _id: { $gte: seeker._id } };
+        }
+
+        let batch = await this.col
+            .find({ ...args, ...pos })
+            .sort(sort)
+            .limit(this.pagination + 1)
             .toArray();
+
+        if (batch.length > this.pagination) {
+            let popped = batch.pop();
+            next = popped._id;
+        }
+
+        return {
+            results: batch,
+            seeker: next
+        };
+
+    };
 
     findOne = async args =>
         await this.col.findOne(args);
@@ -93,3 +119,17 @@ export default class LoaderWrapper {
     };
 
 };
+
+const iterateSort = (obj, ref) =>
+    Object.entries(obj)
+        .reduce((acc, [key, value]) => {
+
+            if (isNaN(value)) {
+                throw new TypeError('Does not support $meta');
+            }
+
+            let prop = value > 0 ? '$gte' : '$lte';
+            acc[key] = { [prop]: ref[key] };
+            return acc;
+
+        }, {});
