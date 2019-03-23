@@ -2,8 +2,8 @@ import DataLoader from 'dataloader';
 import { ObjectId } from 'mongodb';
 import assert from 'assert';
 import sift from 'sift';
-import { appendPagination } from '../src/helpers/response';
-import { generateCursorQuery } from '../src/helpers/query';
+import { appendPagination } from '../helpers/response';
+import { generateCursorQuery } from '../helpers/query';
 
 export default class LoaderWrapper {
     constructor(col, options = {}) {

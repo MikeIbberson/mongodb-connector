@@ -1,4 +1,4 @@
-import { decodeCursor, encodeCursor } from '../src/helpers/encoding';
+import { decodeCursor, encodeCursor } from '../encoding';
 
 describe('encoding helpers', () => {
 

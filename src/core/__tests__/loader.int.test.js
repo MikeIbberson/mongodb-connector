@@ -1,6 +1,6 @@
 import MongoMemoryServer from 'mongodb-memory-server';
 import { MongoClient, ObjectId } from 'mongodb';
-import { Loader } from '../src';
+import Loader from '../loader';
 
 let db;
 let conn;

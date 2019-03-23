@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { generateCursorQuery, generateIDExpression, translateSortingArgument } from '../src/helpers/query';
-import { encodeCursor } from '../src/helpers/encoding';
+import { generateCursorQuery, generateIDExpression, translateSortingArgument } from '../query';
+import { encodeCursor } from '../encoding';
 
 describe('query builder', () => {
 

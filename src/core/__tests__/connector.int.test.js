@@ -1,5 +1,5 @@
-import { Connector } from '../src';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import Connector from '../connector';
 
 let host;
 let dbName;
