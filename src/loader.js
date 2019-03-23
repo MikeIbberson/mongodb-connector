@@ -2,6 +2,8 @@ import DataLoader from 'dataloader';
 import { ObjectId } from 'mongodb';
 import assert from 'assert';
 import sift from 'sift';
+import { encodeCursor } from '../src/helpers/encoding';
+import { generateCursorQuery } from '../src/helpers/query';
 
 export default class LoaderWrapper {
     constructor(col, options = {}) {
@@ -13,6 +15,18 @@ export default class LoaderWrapper {
         this.pagination = 25;
         Object.assign(this, options);
     }
+
+
+    /**
+     * 
+     * Basic dataloader instance. 
+     * Transforms all ids into ObjectIds and uses sift
+     * to appropriately match the results.
+     * 
+     * @method load
+     * @param {array} keys 
+     * @return {object} 
+     */
 
     batchById = new DataLoader(async keys => {
         let ids = keys.map(item => ObjectId(item));
@@ -27,36 +41,42 @@ export default class LoaderWrapper {
         );
     });
 
+
+    /**
+     * 
+     * Uses an ID to track last result, then searches for results greater/less than. 
+     * Will replace with custom sorting if provided. 
+     * 
+     * @param {Object} args - for filtering
+     * @param {Object} sort - for organizing 
+     * @param {String} id - for locating
+     * @return {Object}
+     */
+
     find = async (args, sort, id) => {
 
-        let seeker = null;
-        let next = null;
-        let pos = {};
-
-        if (id) {
-            seeker = await this.findById(id);
-            pos = sort ?
-                iterateSort(sort, seeker) :
-                { _id: { $gte: seeker._id } };
-        }
-
-        let batch = await this.col
-            .find({ ...args, ...pos })
+        let cursor;
+        let results = await this.col
+            .find({
+                $and: [
+                    args || {},
+                    generateCursorQuery(id, sort)]
+            })
             .sort(sort)
             .limit(this.pagination + 1)
             .toArray();
 
-        if (batch.length > this.pagination) {
-            let popped = batch.pop();
-            next = popped._id;
-        }
-
-        return {
-            results: batch,
-            seeker: next
-        };
+        let hasNext = results.length > this.pagination;
+        if (hasNext) cursor = encodeCursor(results.pop());
+        return { hasNext, cursor, results };
 
     };
+
+
+    /**
+     * @TODO: 
+     * Implement new cache so we can store non-id lookups.
+     */
 
     findOne = async args =>
         await this.col.findOne(args);
@@ -119,17 +139,3 @@ export default class LoaderWrapper {
     };
 
 };
-
-const iterateSort = (obj, ref) =>
-    Object.entries(obj)
-        .reduce((acc, [key, value]) => {
-
-            if (isNaN(value)) {
-                throw new TypeError('Does not support $meta');
-            }
-
-            let prop = value > 0 ? '$gte' : '$lte';
-            acc[key] = { [prop]: ref[key] };
-            return acc;
-
-        }, {});
