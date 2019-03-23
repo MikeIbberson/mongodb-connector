@@ -88,13 +88,29 @@ describe('pagination', () => {
             pagination: 1
         });
 
-        let { results, cursor } = await alteredPagination.find(null, { name: 1 });
+        let { results, cursor } = await alteredPagination.find({
+            orderBy: { name: 1 }
+        });
+
         expect(results).toHaveLength(1);
         expect(results[0]).toHaveProperty('name', 'Lee');
 
-        let { results: results2 } = await alteredPagination.find(null, { name: 1 }, cursor);
+        let { results: results2, cursor: cursor2 } = await alteredPagination.find({
+            orderBy: { name: 1 },
+            cursor
+        });
+
         expect(results2).toHaveLength(1);
         expect(results2[0]).toHaveProperty('name', 'Roy');
+
+        let { results: results3 } = await alteredPagination.find({
+            orderBy: { name: 1 },
+            cursor: cursor2,
+            reverse: true
+        });
+
+        expect(results3).toHaveLength(1);
+        expect(results3[0]).toHaveProperty('name', 'Lee');
     });
 
 });

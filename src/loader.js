@@ -2,7 +2,7 @@ import DataLoader from 'dataloader';
 import { ObjectId } from 'mongodb';
 import assert from 'assert';
 import sift from 'sift';
-import { encodeCursor } from '../src/helpers/encoding';
+import { appendPagination } from '../src/helpers/response';
 import { generateCursorQuery } from '../src/helpers/query';
 
 export default class LoaderWrapper {
@@ -47,29 +47,30 @@ export default class LoaderWrapper {
      * Uses an ID to track last result, then searches for results greater/less than. 
      * Will replace with custom sorting if provided. 
      * 
-     * @param {Object} args - for filtering
-     * @param {Object} sort - for organizing 
-     * @param {String} id - for locating
+     * @param {Array} params 
      * @return {Object}
      */
 
-    find = async (args, sort, id) => {
+    find = async params => {
+        let args = {};
+        let sort = {};
 
-        let cursor;
-        let results = await this.col
-            .find({
-                $and: [
-                    args || {},
-                    generateCursorQuery(id, sort)]
-            })
-            .sort(sort)
-            .limit(this.pagination + 1)
-            .toArray();
+        if (params) {
 
-        let hasNext = results.length > this.pagination;
-        if (hasNext) cursor = encodeCursor(results.pop());
-        return { hasNext, cursor, results };
+            let { orderBy, cursor, reverse, ...rest } = params;
+            let orderByStatement = generateCursorQuery(cursor, orderBy, reverse);
 
+            sort = orderBy;
+            args = rest ?
+                { $and: [rest, orderByStatement] } :
+                orderByStatement;
+
+        }
+
+        return await appendPagination(
+            this.col.find(args).sort(sort),
+            this.pagination
+        );
     };
 
 
@@ -88,9 +89,10 @@ export default class LoaderWrapper {
         });
 
     aggregate = async args =>
-        await this.col
-            .aggregate(args)
-            .toArray();
+        await appendPagination(
+            this.col.aggregate(args),
+            this.pagination
+        );
 
     createOne = async args => {
         let { ops, insertedCount } = await this.col

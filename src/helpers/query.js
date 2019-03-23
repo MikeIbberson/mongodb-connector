@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { decodeCursor } from './encoding';
 
-export const generateCursorQuery = (cursor, params) => {
+export const generateCursorQuery = (cursor, params, reverse) => {
     if (!cursor) return {};
 
     let query = {};
@@ -10,7 +10,7 @@ export const generateCursorQuery = (cursor, params) => {
 
     for (let item in params) {
         query[item] = {
-            [translateSortingArgument(params[item])]: doc[item]
+            [translateSortingArgument(params[item], reverse)]: doc[item]
         };
     }
 
@@ -21,10 +21,11 @@ export const generateIDExpression = id => ({
     _id: { $gte: ObjectId(id) }
 });
 
-export const translateSortingArgument = value => {
+export const translateSortingArgument = (value, inverse) => {
     if (isNaN(value)) {
         throw new TypeError('Does not support $meta');
     }
 
-    return value > 0 ? '$gte' : '$lte';
+    let op = inverse ? value < 0 : value > 0;
+    return op ? '$gte' : '$lte';
 };
