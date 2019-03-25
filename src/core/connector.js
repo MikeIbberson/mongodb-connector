@@ -5,6 +5,17 @@ export default class Connector {
     client = null;
     db = null;
 
+
+    /**
+     * Wraps MongoClient. 
+     * Simply, provide a connection string.
+     * 
+     * @param {string} uri 
+     * @param {string} name 
+     * @param {object} args 
+     * @return {object}
+     */
+
     async connect(uri, name, args = {}) {
         if (!uri) throw new Error('Connection string required');
         if (!name) throw new Error('Database name required');
@@ -26,6 +37,17 @@ export default class Connector {
     async disconnect() {
         return await this.client.close();
     }
+
+
+    /**
+     * 
+     * Uses the "createCollection" method so that users can provide 
+     * database configurations like validation and collation in the options.
+     * 
+     * @param {string} name 
+     * @param {object} options
+     * @return {object} 
+     */
 
     async getCollection(name, options) {
         return await this.db.createCollection(name, options);

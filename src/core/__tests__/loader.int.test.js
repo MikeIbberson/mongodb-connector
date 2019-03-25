@@ -1,6 +1,6 @@
 import MongoMemoryServer from 'mongodb-memory-server';
 import { MongoClient, ObjectId } from 'mongodb';
-import { Loader } from '../src';
+import Loader from '../loader';
 
 let db;
 let conn;
@@ -26,8 +26,8 @@ beforeAll(async () => {
     col = db.collection('demo');
 
     await col.insertMany([
-        { _id: ObjectId(), name: 'Lee' },
         { _id: ObjectId(), name: 'Tara' },
+        { _id: ObjectId(), name: 'Lee' },
         ref
     ]);
 });
@@ -43,13 +43,13 @@ afterAll(async () => {
 describe('Read operations', () => {
 
     it('should should return all results', async () => {
-        expect(await instance.find())
-            .toHaveLength(3);
+        let { results } = await instance.find();
+        expect(results).toHaveLength(3);
     });
 
     it('should return filtered results', async () => {
-        expect(await instance.find({ name: 'Roy' }))
-            .toHaveLength(1);
+        let { results } = await instance.find({ name: 'Roy' });
+        expect(results).toHaveLength(1);
     });
 
     it('should return single document', async () => {
@@ -71,6 +71,46 @@ describe('Read operations', () => {
     it('should return null', async () => {
         expect(await instance.findOne({ _id: ObjectId() }))
             .toBeNull();
+    });
+
+});
+
+describe('pagination', () => {
+
+    it('should return 3 unsorted results', async () => {
+        let { results } = await instance.find();
+        expect(results).toHaveLength(3);
+        expect(results[0]).toHaveProperty('name', 'Tara');
+    });
+
+    it('should return a single sorted, paginated result', async () => {
+        let alteredPagination = new Loader(col, {
+            pagination: 1
+        });
+
+        let { results, cursor } = await alteredPagination.find({
+            orderBy: { name: 1 }
+        });
+
+        expect(results).toHaveLength(1);
+        expect(results[0]).toHaveProperty('name', 'Lee');
+
+        let { results: results2, cursor: cursor2 } = await alteredPagination.find({
+            orderBy: { name: 1 },
+            cursor
+        });
+
+        expect(results2).toHaveLength(1);
+        expect(results2[0]).toHaveProperty('name', 'Roy');
+
+        let { results: results3 } = await alteredPagination.find({
+            orderBy: { name: 1 },
+            cursor: cursor2,
+            reverse: true
+        });
+
+        expect(results3).toHaveLength(1);
+        expect(results3[0]).toHaveProperty('name', 'Lee');
     });
 
 });

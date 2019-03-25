@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Loader } from '../src';
+import Loader from '../loader';
 
 let args = { stats: jest.fn };
 let instance;
