@@ -17,11 +17,12 @@ As you'll see, this export wraps only the most popular collection methods. There
 
 I suspect that I will introduce new methods over time. If there's one you'd like to see, please message me and I'll implement. 
 
-|Method|Parameters|Response|Cached/Batched|
-|---|---|---|---|
-|`batchById`|ObjectId(`array`)|`array`|yes|
-|`find`|Query options(`object`)|`array`|no|
-|`findOne`|Query options(`object`)|`object`|no|
-|`createOne`|Data for insertion(`object`)|`object`|no|
-|`updateById`|ObjectId(`string`), MongoDB payload with operators(`object`)|`object`|yes|
-|`deleteById`|ObjectId(`string`) and a property name(`string`)|`boolean`|yes|
+|Method|Description|Parameters|Response|Cached/Batched|
+|---|---|---|---|---|
+|`batchById`|Batch find requests|ObjectId(`array`)|`array`|yes|
+|`find`|Lookup paginated results|Query options(`object`)|`array`|no|
+|`findOne`|Find single document by query|Query options(`object`)|`object`|no|
+|`findOne`|Find single document by ID|ObjectId(`string`)|`object`|no|
+|`createOne`|Insert new document|Payload(`object`)|`object`|no|
+|`updateById`|Update an existing document|ObjectId(`string`), payload with operators(`object`)|`object`|yes|
+|`deleteById`|Remove an existing document or mark it invisible with custom property|ObjectId(`string`),property name(`string`)|`boolean`|yes|
