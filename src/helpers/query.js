@@ -1,6 +1,14 @@
 import { ObjectId } from 'mongodb';
 import { decodeCursor } from './encoding';
 
+/**
+ * 
+ * @TODO
+ * Should likely refactor these methods. 
+ * Ended up drilling the reverse param a little too deeply. 
+ * 
+ */
+
 export const generateCursorQuery = (cursor, params, reverse) => {
     if (!cursor) return {};
 
