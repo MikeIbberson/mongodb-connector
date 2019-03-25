@@ -6,6 +6,17 @@ import { appendPagination } from '../helpers/response';
 import { generateCursorQuery } from '../helpers/query';
 
 export default class LoaderWrapper {
+
+    /**
+     * 
+     * Inject a MongoDB collection dependency.
+     * Curently, only pagination is a supported "option" at 
+     * the collection level.  
+     * 
+     * @param {*} col 
+     * @param {*} options 
+     */
+
     constructor(col, options = {}) {
         if (!col.stats || typeof col.stats !== 'function') {
             throw new Error('Must provide a collection');
@@ -75,12 +86,25 @@ export default class LoaderWrapper {
 
 
     /**
-     * @TODO: 
-     * Implement new cache so we can store non-id lookups.
+     * 
+     * @NOTE
+     * Does not introduce any functionality.
      */
 
     findOne = async args =>
-        await this.col.findOne(args);
+        await this.col
+            .findOne(args);
+
+
+    /**
+     * 
+     * Quickly look up a document by its ID.
+     * Can provide additional criteria. 
+     * 
+     * @param {string} id
+     * @param {object} options
+     * @return {object}
+     */
 
     findById = async (id, options = {}) =>
         await this.col.findOne({
@@ -88,11 +112,32 @@ export default class LoaderWrapper {
             ...options
         });
 
+
+    /**
+     * 
+     * Wraps the aggregation method in the same pagination 
+     * helper as find. Excepts that sorting is handled in the
+     * pipeline. 
+     * 
+     * @param {object} args 
+     * @return {array}
+     */
+
     aggregate = async args =>
         await appendPagination(
             this.col.aggregate(args),
             this.pagination
         );
+
+
+    /**
+     * 
+     * Flattens the MongoDB response to the created document.
+     * Also, primes the cache with a new result. 
+     * 
+     * @param {object} args 
+     * @return {object}
+     */
 
     createOne = async args => {
         let { ops, insertedCount } = await this.col
@@ -105,6 +150,16 @@ export default class LoaderWrapper {
         this.batchById.prime(doc._id, doc);
         return doc;
     };
+
+
+    /**
+     * Update a single document by its ID. 
+     * This will return the updated value.
+     * 
+     * @param {string} id
+     * @param {object} args 
+     * @return {object}
+     */
 
     updateById = async (id, args) => {
         if (!id) throw new Error('ID required');
@@ -119,6 +174,16 @@ export default class LoaderWrapper {
         this.batchById.clear(id);
         return value;
     };
+
+
+    /**
+     * Simplify delete operations.
+     * Allows for deletion or toggling of a visibility attribute.
+     * 
+     * @param {string} id 
+     * @param {string} toggle
+     * @returns {boolean}
+     */
 
     deleteById = async (id, toggle) => {
         if (toggle) {
